@@ -1,6 +1,25 @@
-# terraform-cascade
+# Terraform Cascade
+<img src="./assets/gopher.png" height="200">
 
+## Demo
 [![asciicast](https://asciinema.org/a/598560.svg)](https://asciinema.org/a/598560)
+
+# Overview
+**Terraform Cascade** is a terraform-like tool that allows you to manage multiple terraform projects.
+
+It's made to be fully compatible with terraform, so you can use it as a drop-in replacement. However, it requires the **terraform binary to be available in the PATH**.
+
+# Design
+It works with a very opinionated design:
+* Every project is inside a deep directory structure.
+* To define a project, you only need to place a `backend.tf` file in that directory.
+* In each layer, will be executed in the following order:
+    1. **Current directory** (only when it has a `backend.tf` file)
+    2. **Whole `base` directory** (with its layer)
+    3. **Other directories** (with its layer)
+
+
+# Usage
 
 ### Build
 ```
