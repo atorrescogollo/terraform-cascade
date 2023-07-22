@@ -60,5 +60,5 @@ terraform.rc
 .vscode/
 
 # Samples
-/samples/tmp/*
+/samples/**/tmp/*
 /samples/**/.terraform.lock.hcl
