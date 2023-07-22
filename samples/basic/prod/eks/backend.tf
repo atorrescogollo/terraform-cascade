@@ -1,5 +1,5 @@
 terraform {
   backend "local" {
-    path = "/tmp/.terraform/prod_eks.tfstate"
+    path = "/tmp/cascade/.terraform/prod_eks.tfstate"
   }
 }

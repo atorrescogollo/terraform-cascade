@@ -56,4 +56,9 @@ override.tf.json
 terraform.rc
 
 
+# Visual Studio Code
 .vscode/
+
+# Samples
+/samples/tmp/*
+/samples/**/.terraform.lock.hcl

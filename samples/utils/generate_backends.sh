@@ -15,7 +15,7 @@ find . -type f -name "*.tf" -not -name "backend.tf" -exec dirname {} \; | sort -
   cat <<EOF > "${dir}/backend.tf"
 terraform {
   backend "local" {
-    path = "/tmp/.terraform/${safe_dir}.tfstate"
+    path = "/tmp/cascade/.terraform/${safe_dir}.tfstate"
   }
 }
 EOF

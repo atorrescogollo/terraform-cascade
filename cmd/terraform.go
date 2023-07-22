@@ -19,8 +19,10 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
+	"github.com/atorrescogollo/terraform-cascade/internal/orchestration"
 	"github.com/atorrescogollo/terraform-cascade/internal/shared/utils"
 	"github.com/atorrescogollo/terraform-cascade/internal/terraform"
 	"github.com/spf13/cobra"
@@ -75,10 +77,11 @@ var terraformCmd = &cobra.Command{
 			cmd.Usage()
 			return
 		}
-		exitErr := terraform.TerraformExecWithOS(terraformArgs)
-		if exitErr != nil {
+
+		exitErr := Run(cmd, terraformArgs)
+		if exitErr != nil && exitErr.ExitCode() != 0 {
+			fmt.Println("Error: Terraform exited with code", exitErr.ExitCode())
 			os.Exit(exitErr.ExitCode())
-			return
 		}
 	},
 }
@@ -122,13 +125,28 @@ Terraform Args:
 		return nil
 	})
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// terraformCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	terraformCmd.Flags().Bool("cascade-recursive", false, "Execute terraform projects recursively in order")
+}
+
+func Run(cmd *cobra.Command, args []string) *exec.ExitError {
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	recursive, _ := cmd.Flags().GetBool("cascade-recursive")
+	if recursive {
+		orchestrateDir, err := orchestration.OrchestrateProjectDirectory(cwd)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		return orchestration.RunTerraformRecursively(*orchestrateDir, args, 0)
+	} else {
+		/*
+		* Simply run terraform in the current directory
+		 */
+		return terraform.TerraformExecWithOS(cwd, args)
+	}
 }
