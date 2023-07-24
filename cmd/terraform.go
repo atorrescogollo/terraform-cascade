@@ -19,13 +19,16 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
-	"github.com/atorrescogollo/terraform-cascade/internal/orchestration"
+	"github.com/atorrescogollo/terraform-cascade/internal/controller"
 	"github.com/atorrescogollo/terraform-cascade/internal/shared/utils"
-	"github.com/atorrescogollo/terraform-cascade/internal/terraform"
 	"github.com/spf13/cobra"
+)
+
+var terraformController = controller.NewTerraformController(
+	*runRawTerraformUseCase,
+	*runRecursiveTerraformUseCase,
 )
 
 // terraformCmd represents the terraform command
@@ -35,54 +38,12 @@ var terraformCmd = &cobra.Command{
 	Long:  `Terraform commands through the cascade cli.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Flags().Parse(args)
-		help := false
-		if len(args) == 0 ||
-			(len(args) == 1 && (args[0] == "-h" ||
-				args[0] == "--help" ||
-				args[0] == "-help" ||
-				args[0] == "help")) {
-			help = true
-		}
 
-		terraformArgs := utils.ExtractUnknownArgs(cmd.Flags(), args)
-		if !help {
-			/*
-			* Help command is actually there since cobra adds it behind the scenes.
-			* We add it when it's not the first argument so that it executes
-			* help as a terraform command instead of the cascade help command.
-			*
-			* For example:
-			*
-			*   cascade terraform --help        # Executes cascade help + terraform help
-			*
-			*   cascade terraform plan --help   # Executes terraform-plan help
-			*
-			 */
-			trailingHelp, _ := cmd.Flags().GetBool("help")
-			if trailingHelp {
-				terraformArgs = append(terraformArgs, "--help")
-			}
-		}
-		showUsage := false
-		for _, tfArg := range terraformArgs {
-			if strings.HasPrefix(tfArg, "--cascade-") {
-				// This is not a terraform flag. We need to handle
-				// it here since UnknownFlags is whitelisted
-				fmt.Println("Error: unknown flag:", tfArg)
-				showUsage = true
-				continue
-			}
-		}
-		if help || showUsage {
-			cmd.Usage()
-			return
-		}
-
-		exitErr := Run(cmd, terraformArgs)
-		if exitErr != nil && exitErr.ExitCode() != 0 {
-			fmt.Println("Error: Terraform exited with code", exitErr.ExitCode())
-			os.Exit(exitErr.ExitCode())
-		}
+		terraformArgs := retrieveTerraformArgsOrExit(cmd, args)
+		recursive, _ := cmd.Flags().GetBool("cascade-recursive")
+		utils.ExitWithErr(
+			terraformController.Handle(recursive, terraformArgs),
+		)
 	},
 }
 
@@ -112,41 +73,53 @@ Global Flags:
 
 Terraform Args:
 `)
-	defaultUsageFunc := terraformCmd.UsageFunc()
-	terraformCmd.SetUsageFunc(func(cmd *cobra.Command) error {
-		terraformUsage := terraform.TerraformUsage()
-		err := defaultUsageFunc(cmd)
-		if err != nil {
-			return err
-		}
-
-		fmt.Println()
-		fmt.Println(terraformUsage)
-		return nil
-	})
+	terraformCmd.SetUsageFunc(terraformController.Usage)
 
 	terraformCmd.Flags().Bool("cascade-recursive", false, "Execute terraform projects recursively in order")
 }
 
-func Run(cmd *cobra.Command, args []string) *exec.ExitError {
-	cwd, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+func retrieveTerraformArgsOrExit(cmd *cobra.Command, args []string) []string {
+	help := false
+	if len(args) == 0 ||
+		(len(args) == 1 && (args[0] == "-h" ||
+			args[0] == "--help" ||
+			args[0] == "-help" ||
+			args[0] == "help")) {
+		help = true
 	}
 
-	recursive, _ := cmd.Flags().GetBool("cascade-recursive")
-	if recursive {
-		orchestrateDir, err := orchestration.OrchestrateProjectDirectory(cwd)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		return orchestration.RunTerraformRecursively(*orchestrateDir, args, 0)
-	} else {
+	terraformArgs := utils.ExtractUnknownArgs(cmd.Flags(), args)
+	if !help {
 		/*
-		* Simply run terraform in the current directory
+		* Help command is actually there since cobra adds it behind the scenes.
+		* We add it when it's not the first argument so that it executes
+		* help as a terraform command instead of the cascade help command.
+		*
+		* For example:
+		*
+		*   cascade terraform --help        # Executes cascade help + terraform help
+		*
+		*   cascade terraform plan --help   # Executes terraform-plan help
+		*
 		 */
-		return terraform.TerraformExecWithOS(cwd, args)
+		trailingHelp, _ := cmd.Flags().GetBool("help")
+		if trailingHelp {
+			terraformArgs = append(terraformArgs, "--help")
+		}
 	}
+	showUsage := false
+	for _, tfArg := range terraformArgs {
+		if strings.HasPrefix(tfArg, "--cascade-") {
+			// This is not a terraform flag. We need to handle
+			// it here since UnknownFlags is whitelisted
+			fmt.Println("Error: unknown flag:", tfArg)
+			showUsage = true
+			continue
+		}
+	}
+	if help || showUsage {
+		cmd.Usage()
+		os.Exit(1)
+	}
+	return terraformArgs
 }

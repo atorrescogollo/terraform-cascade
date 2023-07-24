@@ -20,6 +20,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//var cascadeController = controller.NewCascadeController(
+//	*runRecursiveTerraformUseCase,
+//)
+
 // cascadeCmd represents the cascade command
 var cascadeCmd = &cobra.Command{
 	Use:   "cascade",
@@ -29,7 +33,11 @@ Specific commands for cascade orchestration.
 
 WORK IN PROGRESS
 `,
-	//Run: func(cmd *cobra.Command, args []string) {},
+	//Run: func(cmd *cobra.Command, args []string) {
+	//	utils.ExitWithErr(
+	//		cascadeController.HandleCascade(),
+	//	)
+	//},
 }
 
 func init() {

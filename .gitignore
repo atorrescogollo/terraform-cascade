@@ -62,3 +62,7 @@ terraform.rc
 # Samples
 /samples/**/tmp/*
 /samples/**/.terraform.lock.hcl
+
+# Asciinema
+/.asciinema/
+/assets/asciinema.sh.cast

@@ -27,13 +27,22 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "terraform-cascade",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "An opinionated terraform project orchestrator",
+	Long: `
+Terraform Cascade is a terraform-like tool that allows you to manage multiple terraform projects.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+It's made to be fully compatible with terraform, so you can use it as a drop-in replacement. However, it requires the terraform binary to be available in the PATH.
+
+== Design ==
+It works with a very opinionated design:
+
+* Every project is inside a deep directory structure.
+* To define a project, you only need to place a backend.tf file in that directory.
+    * In each layer, will be executed in the following order:
+    * Current directory (only when it has a backend.tf file)
+    * Whole base directory (with its layer)
+    * Other directories (with its layer)
+`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//Run: func(cmd *cobra.Command, args []string) {},

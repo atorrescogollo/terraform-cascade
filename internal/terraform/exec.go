@@ -21,7 +21,8 @@ func TerraformExec(execDir string, args []string, stdout io.Writer, sterr io.Wri
 	cmd.Stderr = sterr
 	cmd.Stdin = stdin
 
-	fmt.Println("Running terraform:", cmd.String(), "[dir=", execDir, "]")
+	fmt.Printf("%s\nRunning terraform %s\n", execDir, args)
+
 	if err := cmd.Run(); err != nil {
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			return exiterr

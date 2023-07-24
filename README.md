@@ -2,7 +2,7 @@
 <img src="./assets/gopher.png" height="200">
 
 ## Demo
-[![asciicast](https://asciinema.org/a/598560.svg)](https://asciinema.org/a/598560)
+[![asciicast](https://asciinema.org/a/JPYlivXxoZvB5PvjNvOxVQb7O.svg)](https://asciinema.org/a/JPYlivXxoZvB5PvjNvOxVQb7O)
 
 # Overview
 **Terraform Cascade** is a terraform-like tool that allows you to manage multiple terraform projects.
