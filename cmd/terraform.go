@@ -27,8 +27,8 @@ import (
 )
 
 var terraformController = controller.NewTerraformController(
-	*runRawTerraformUseCase,
-	*runRecursiveTerraformUseCase,
+	runRawTerraformUseCase,
+	runRecursiveTerraformUseCase,
 )
 
 // terraformCmd represents the terraform command

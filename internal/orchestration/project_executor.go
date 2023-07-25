@@ -39,12 +39,12 @@ func NewProjectExecutor(terraformExecFn terraformExecutorFn, stdout io.Writer, s
 
 func (p ProjectExecutor) Execute(projects []project.TerraformProject, args []string) error {
 	for _, project := range projects {
-		fmt.Println(`
+		p.stdout.Write([]byte(`
 
 
 ===============[ Running terraform in ` + project.RelativePath + ` ]===============
 
-		`)
+		`))
 		exitErr := p.terraformExecFn(
 			filepath.Join(project.BaseDir, project.RelativePath),
 			args,

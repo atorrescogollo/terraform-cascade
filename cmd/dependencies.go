@@ -10,8 +10,8 @@ var projectExecutor = orchestration.NewTerraformProjectExecutorWithOS()
 var projectOrderResolver = orchestration.NewProjectOrderResolver()
 
 // Use cases
-var runRawTerraformUseCase = usecases.NewRunRawTerraformUseCase()
-var runRecursiveTerraformUseCase = usecases.NewRunRecursiveTerraformUseCase(
+var runRawTerraformUseCase usecases.RunRawTerraformUseCase = usecases.NewRunRawTerraformUseCaseImpl()
+var runRecursiveTerraformUseCase usecases.RunRecursiveTerraformUseCase = usecases.NewRunRecursiveTerraformUseCaseImpl(
 	*projectExecutor,
 	*projectOrderResolver,
 )
