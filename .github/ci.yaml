@@ -25,6 +25,8 @@ jobs:
           go-version-file: go.mod
       - name: Verify dependencies
         run: go mod verify
+      - name: Go fmt
+        run: gofmt -l .
       - name: Build
         run: go build -v ./...
       - name: Run go vet
