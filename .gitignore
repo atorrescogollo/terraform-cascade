@@ -20,7 +20,7 @@ crash.*.log
 *.dll
 *.so
 *.dylib
-build/
+dist/
 
 # Test binary, built with `go test -c`
 *.test

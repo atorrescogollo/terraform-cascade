@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  workflow_dispatch:
+
+permissions:
+  contents: write      # Needed by semantic-release/github
+  pull-requests: write # Needed by semantic-release/github
+  issues: write        # Needed by semantic-release/github
+
+jobs:
+  ci:
+    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        id: setup-go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+      - name: Verify dependencies
+        run: go mod verify
+      - name: Go fmt
+        run: gofmt -l .
+      - name: Build
+        run: go build -v ./...
+      - name: Run go vet
+        run: go vet ./...
+      - name: Run staticcheck
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+          staticcheck ./...
+      - name: Run golint
+        run: |
+          go install golang.org/x/lint/golint@latest
+          golint ./...
+      - name: Run tests
+        run: go test -race -vet=off ./...
+      - name: Build cross platform binaries
+        run: |
+          go install github.com/mitchellh/gox@latest
+          # https://github.com/mitchellh/gox/issues/146#issuecomment-702096359
+          gox -osarch '!darwin/386' -output "dist/{{.Dir}}_{{.OS}}_{{.Arch}}" ./...
+
+      - name: Semantic Release
+        if: |
+          ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
+          github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm -g i \
+            semantic-release@^21 \
+            @semantic-release/commit-analyzer@^10 \
+            @semantic-release/release-notes-generator@^11 \
+            @semantic-release/changelog@^6 \
+            @semantic-release/git@^10 \
+            @semantic-release/github@^9 \
+            conventional-changelog-conventionalcommits@^5
+
+          npx semantic-release
