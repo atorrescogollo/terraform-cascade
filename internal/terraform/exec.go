@@ -10,11 +10,13 @@ import (
 	"os/exec"
 )
 
-func TerraformExecWithOS(execDir string, args []string) *exec.ExitError {
-	return TerraformExec(execDir, args, os.Stdout, os.Stderr, os.Stdin)
+// ExecWithOS executes terraform cli with default OS streams
+func ExecWithOS(execDir string, args []string) *exec.ExitError {
+	return Exec(execDir, args, os.Stdout, os.Stderr, os.Stdin)
 }
 
-func TerraformExec(execDir string, args []string, stdout io.Writer, sterr io.Writer, stdin io.Reader) *exec.ExitError {
+// Exec executes terraform cli
+func Exec(execDir string, args []string, stdout io.Writer, sterr io.Writer, stdin io.Reader) *exec.ExitError {
 	cmd := exec.Command("terraform", args...)
 	cmd.Dir = execDir
 	cmd.Stdout = stdout
@@ -32,7 +34,8 @@ func TerraformExec(execDir string, args []string, stdout io.Writer, sterr io.Wri
 	return nil
 }
 
-func TerraformUsage() string {
+// Usage outputs terraform usage
+func Usage() string {
 	var buffer bytes.Buffer
 	bufferWriter := bufio.NewWriter(&buffer)
 
@@ -40,7 +43,7 @@ func TerraformUsage() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	exitErr := TerraformExec(cwd, []string{"--help"}, bufferWriter, bufferWriter, bytes.NewReader(nil))
+	exitErr := Exec(cwd, []string{"--help"}, bufferWriter, bufferWriter, bytes.NewReader(nil))
 	if exitErr != nil {
 		log.Fatal(exitErr)
 	}

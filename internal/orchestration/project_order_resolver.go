@@ -9,16 +9,20 @@ import (
 	"github.com/atorrescogollo/terraform-cascade/internal/project"
 )
 
+// ProjectOrderResolver resolves the terraform projects in order
+// of precedence
 type ProjectOrderResolver struct {
 	ReadDirFn func(name string) ([]fs.DirEntry, error)
 }
 
+// NewProjectOrderResolver ProjectOrderResolver constructor
 func NewProjectOrderResolver() *ProjectOrderResolver {
 	return &ProjectOrderResolver{
 		ReadDirFn: os.ReadDir,
 	}
 }
 
+// Resolve resolves the terraform projects in order of precedence
 func (r ProjectOrderResolver) Resolve(cwd string) ([]project.TerraformProject, error) {
 	return r.resolve(cwd, ".")
 }

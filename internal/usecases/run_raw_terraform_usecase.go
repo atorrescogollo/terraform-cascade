@@ -4,13 +4,16 @@ import (
 	"github.com/atorrescogollo/terraform-cascade/internal/terraform"
 )
 
+// RunRawTerraformUseCase runs simple terraform command in a given directory
 type RunRawTerraformUseCase interface {
 	Execute(execDir string, terraformArgs []string) error
 }
 
 /*
-* Mock
+* Mocks
  */
+
+// MockRunRawTerraformUseCase is a mock implementation of RunRawTerraformUseCase
 type MockRunRawTerraformUseCase struct {
 	Executions []struct {
 		ExecDir       string
@@ -18,6 +21,7 @@ type MockRunRawTerraformUseCase struct {
 	}
 }
 
+// NewMockRunRawTerraformUseCase MockRunRawTerraformUseCase constructor
 func NewMockRunRawTerraformUseCase() *MockRunRawTerraformUseCase {
 	return &MockRunRawTerraformUseCase{
 		Executions: make([]struct {
@@ -26,6 +30,8 @@ func NewMockRunRawTerraformUseCase() *MockRunRawTerraformUseCase {
 		}, 0),
 	}
 }
+
+// Execute executes terraform in a given directory
 func (u *MockRunRawTerraformUseCase) Execute(execDir string, terraformArgs []string) error {
 	u.Executions = append(u.Executions, struct {
 		ExecDir       string
@@ -37,12 +43,16 @@ func (u *MockRunRawTerraformUseCase) Execute(execDir string, terraformArgs []str
 /*
 * Implementation
  */
+
+// RunRawTerraformUseCaseImpl is the implementation of RunRawTerraformUseCase
 type RunRawTerraformUseCaseImpl struct{}
 
+// NewRunRawTerraformUseCaseImpl RunRawTerraformUseCaseImpl constructor
 func NewRunRawTerraformUseCaseImpl() *RunRawTerraformUseCaseImpl {
 	return &RunRawTerraformUseCaseImpl{}
 }
 
+// Execute executes terraform in a given directory
 func (u RunRawTerraformUseCaseImpl) Execute(execDir string, terraformArgs []string) error {
-	return terraform.TerraformExecWithOS(execDir, terraformArgs)
+	return terraform.ExecWithOS(execDir, terraformArgs)
 }
