@@ -4,6 +4,8 @@ import (
 	"github.com/atorrescogollo/terraform-cascade/internal/orchestration"
 )
 
+// RunRecursiveTerraformUseCase runs terraform recursively in a given directory
+// in the correct order
 type RunRecursiveTerraformUseCase interface {
 	Execute(execDir string, terraformArgs []string) error
 }
@@ -11,6 +13,8 @@ type RunRecursiveTerraformUseCase interface {
 /*
 * Mock
  */
+
+// MockRunRecursiveTerraformUseCase is a mock implementation of RunRecursiveTerraformUseCase
 type MockRunRecursiveTerraformUseCase struct {
 	Executions []struct {
 		ExecDir       string
@@ -18,6 +22,7 @@ type MockRunRecursiveTerraformUseCase struct {
 	}
 }
 
+// NewMockRunRecursiveTerraformUseCase MockRunRecursiveTerraformUseCase constructor
 func NewMockRunRecursiveTerraformUseCase() *MockRunRecursiveTerraformUseCase {
 	return &MockRunRecursiveTerraformUseCase{
 		Executions: make([]struct {
@@ -26,6 +31,8 @@ func NewMockRunRecursiveTerraformUseCase() *MockRunRecursiveTerraformUseCase {
 		}, 0),
 	}
 }
+
+// Execute executes terraform in a given directory
 func (u *MockRunRecursiveTerraformUseCase) Execute(execDir string, terraformArgs []string) error {
 	u.Executions = append(u.Executions, struct {
 		ExecDir       string
@@ -37,11 +44,14 @@ func (u *MockRunRecursiveTerraformUseCase) Execute(execDir string, terraformArgs
 /*
 * Implementation
  */
+
+// RunRecursiveTerraformUseCaseImpl is the implementation of RunRecursiveTerraformUseCase
 type RunRecursiveTerraformUseCaseImpl struct {
 	projectExecutor       orchestration.ProjectExecutor
 	projectObjectResolver orchestration.ProjectOrderResolver
 }
 
+// NewRunRecursiveTerraformUseCaseImpl RunRecursiveTerraformUseCaseImpl constructor
 func NewRunRecursiveTerraformUseCaseImpl(projectExecutor orchestration.ProjectExecutor, projectObjectResolver orchestration.ProjectOrderResolver) *RunRecursiveTerraformUseCaseImpl {
 	return &RunRecursiveTerraformUseCaseImpl{
 		projectExecutor,
@@ -49,6 +59,7 @@ func NewRunRecursiveTerraformUseCaseImpl(projectExecutor orchestration.ProjectEx
 	}
 }
 
+// Execute executes terraform in a given directory
 func (u RunRecursiveTerraformUseCaseImpl) Execute(execDir string, terraformArgs []string) error {
 	projects, err := u.projectObjectResolver.Resolve(execDir)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
+// ExtractUnknownArgs extracts unknown args from a flagset
 // https://github.com/spf13/cobra/issues/739#issuecomment-677999676
 func ExtractUnknownArgs(flags *pflag.FlagSet, args []string) []string {
 	unknownArgs := []string{}

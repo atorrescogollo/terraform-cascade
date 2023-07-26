@@ -6,6 +6,7 @@ import (
 	"os/exec"
 )
 
+// ExitWithErr exits with OS exit code that matches the exit code of the error
 func ExitWithErr(err error) {
 	var exitErr *exec.ExitError
 	if err != nil {

@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  workflow_dispatch:
+
+jobs:
+  ci:
+    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        id: setup-go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+      - name: Verify dependencies
+        run: go mod verify
+      - name: Build
+        run: go build -v ./...
+      - name: Run go vet
+        run: go vet ./...
+      - name: Install staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+      - name: Run staticcheck
+        run: staticcheck ./...
+      - name: Install golint
+        run: go install golang.org/x/lint/golint@latest
+      - name: Run golint
+        run: golint ./...
+      - name: Run tests
+        run: go test -race -vet=off ./...
+
+      - name: Build cross platform binaries
+        uses: crazy-max/ghaction-xgo@v2
+        with:
+          xgo_version: latest
+          go_version: ${{ steps.setup-go.outputs.go-version }}
+          dest: build
+          prefix: ${{ github.repository_name }}
+          v: true
+          ldflags: -s -w
+          trimpath: true
+      - name: Semantic Release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: cycjimmy/semantic-release-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          extra_plugins: |
+            @semantic-release/commit-analyzer
+            @semantic-release/release-notes-generator
+            @semantic-release/changelog
+            @semantic-release/git
+            @semantic-release/github

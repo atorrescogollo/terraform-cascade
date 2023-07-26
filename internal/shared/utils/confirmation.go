@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// WaitForConfirmation waits for user confirmation (y/n)
 func WaitForConfirmation(message string) bool {
 	var response string
 
