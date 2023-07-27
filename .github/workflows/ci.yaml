@@ -47,10 +47,16 @@ jobs:
       - name: Run tests
         run: go test -race -vet=off ./...
       - name: Build cross platform binaries
+        env:
+          LINUX_OS_ARCH: 'linux/386 linux/amd64 linux/arm linux/arm64'
+          WINDOWS_OS_ARCH: 'windows/386 windows/amd64'
+          DARWIN_OS_ARCH: 'darwin/amd64 darwin/arm64'
         run: |
           go install github.com/mitchellh/gox@latest
           # https://github.com/mitchellh/gox/issues/146#issuecomment-702096359
-          gox -osarch '!darwin/386' -output "dist/{{.Dir}}_{{.OS}}_{{.Arch}}" ./...
+          gox \
+            -osarch "${LINUX_OS_ARCH} ${WINDOWS_OS_ARCH} ${DARWIN_OS_ARCH}" \
+            -output "dist/{{.Dir}}_{{.OS}}_{{.Arch}}" ./...
 
       - name: Semantic Release
         if: |
